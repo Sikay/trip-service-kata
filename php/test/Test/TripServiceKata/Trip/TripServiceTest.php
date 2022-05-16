@@ -38,10 +38,26 @@ class TripServiceTest extends TestCase
         $friend->addFriend(new User(self::ANOTHER_USER));
         $friend->addTrip(new Trip());
 
-        $this->tripService->loggedInUser = new User(self::REGISTERED_USER);;
+        $this->tripService->loggedInUser = new User(self::REGISTERED_USER);
         $friendTrip = $this->tripService->getTripsByUser($friend);
 
         self::assertTrue(sizeof($friendTrip) === 0);
+    }
+
+    /** @test */
+    public function should_return_friends_trips_when_users_are_friends() {
+        $loggedInUser = new User(self::REGISTERED_USER);
+
+        $friend = new User('Juan');
+        $friend->addFriend(new User(self::ANOTHER_USER));
+        $friend->addFriend($loggedInUser);
+        $friend->addTrip(new Trip());
+        $friend->addTrip(new Trip());
+
+        $this->tripService->loggedInUser = $loggedInUser;
+        $friendTrip = $this->tripService->getTripsByUser($friend);
+
+        self::assertTrue(sizeof($friendTrip) === 2);
     }
 
 }
@@ -53,5 +69,10 @@ class TesteableTripService extends TripService {
     protected function getLoggedInUser()
     {
         return $this->loggedInUser;
+    }
+
+    protected function tripsBy(User $user): array
+    {
+        return $user->getTrips();
     }
 }
