@@ -9,10 +9,10 @@ use TripServiceKata\User\User;
 
 class TripServiceTest extends TestCase
 {
-    /**
-     * @var TripService
-     */
-    private $tripService;
+    private const GUEST = null;
+    private const UNUSED_USER = null;
+
+    private TesteableTripService $tripService;
 
     protected function setUp()
     {
@@ -22,15 +22,20 @@ class TripServiceTest extends TestCase
     /** @test */
     public function should_throw_an_exception_when_user_is_not_logged_in() {
         $this->expectException(UserNotLoggedInException::class);
-        $this->tripService->getTripsByUser(new User(null));
+
+        $this->tripService->loggedInUser = self::GUEST;
+
+        $this->tripService->getTripsByUser(new User(self::UNUSED_USER));
     }
 
 }
 
 class TesteableTripService extends TripService {
 
+    public $loggedInUser;
+
     protected function getLoggedInUser()
     {
-        return null;
+        return $this->loggedInUser;
     }
 }
