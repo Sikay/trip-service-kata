@@ -16,11 +16,6 @@ class TripService
         return $user->isFriendsWith($loggedInUser) ? $tripDAO->tripsBy($user) : $this->noTrips();
     }
 
-    protected function tripsBy(User $user)
-    {
-        return TripDAO::findTripsByUser($user);
-    }
-
     private function noTrips(): array
     {
         return array();
