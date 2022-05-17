@@ -16,11 +16,12 @@ class TripServiceTest extends TestCase
     private const ANOTHER_USER = 'Pepe';
 
     private TesteableTripService $tripService;
+    private User $loggedInUser;
 
     protected function setUp()
     {
         $this->tripService = new TesteableTripService();
-        $this->tripService->loggedInUser = new User(self::REGISTERED_USER);
+        $this->loggedInUser = new User(self::REGISTERED_USER);
     }
 
     /** @test */
@@ -29,7 +30,7 @@ class TripServiceTest extends TestCase
 
         $this->tripService->loggedInUser = self::GUEST;
 
-        $this->tripService->getTripsByUser(new User(self::UNUSED_USER));
+        $this->tripService->getTripsByUser(new User(self::UNUSED_USER), self::GUEST);
     }
 
     /** @test */
@@ -42,7 +43,7 @@ class TripServiceTest extends TestCase
                     ->withTrips($toBrazil)
                     ->build();
 
-        $friendTrip = $this->tripService->getTripsByUser($friend);
+        $friendTrip = $this->tripService->getTripsByUser($friend, $this->loggedInUser);
 
         self::assertTrue(sizeof($friendTrip) === 0);
     }
@@ -54,11 +55,11 @@ class TripServiceTest extends TestCase
         $toLondon = new Trip();
 
         $friend = UserBuilder::aUser()
-                    ->friendsWith($anotherUser, $this->tripService->loggedInUser)
+                    ->friendsWith($anotherUser, $this->loggedInUser)
                     ->withTrips($toBrazil, $toLondon)
                     ->build();
 
-        $friendTrip = $this->tripService->getTripsByUser($friend);
+        $friendTrip = $this->tripService->getTripsByUser($friend, $this->loggedInUser);
 
         self::assertTrue(sizeof($friendTrip) === 2);
     }
@@ -68,11 +69,6 @@ class TripServiceTest extends TestCase
 class TesteableTripService extends TripService {
 
     public $loggedInUser;
-
-    protected function getLoggedInUser()
-    {
-        return $this->loggedInUser;
-    }
 
     protected function tripsBy(User $user): array
     {
