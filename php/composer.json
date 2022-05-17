@@ -19,8 +19,9 @@
         "bin-dir": "bin"
     },
     "autoload": {
-        "psr-0": {
-            "": ["src/"]
+        "psr-4": {
+            "": "src",
+            "Test\\": "test/Test"
         }
     }
 }

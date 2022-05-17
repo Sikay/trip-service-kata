@@ -34,10 +34,13 @@ class TripServiceTest extends TestCase
 
     /** @test */
     public function should_not_return_any_trips_when_users_are_not_friends() {
+        $anotherUser = new User(self::ANOTHER_USER);
+        $toBrazil = new Trip();
 
-        $friend = new User('Juan');
-        $friend->addFriend(new User(self::ANOTHER_USER));
-        $friend->addTrip(new Trip());
+        $friend = UserBuilder::aUser()
+                    ->friendsWith($anotherUser)
+                    ->withTrips($toBrazil)
+                    ->build();
 
         $friendTrip = $this->tripService->getTripsByUser($friend);
 
@@ -46,11 +49,14 @@ class TripServiceTest extends TestCase
 
     /** @test */
     public function should_return_friends_trips_when_users_are_friends() {
-        $friend = new User('Juan');
-        $friend->addFriend(new User(self::ANOTHER_USER));
-        $friend->addFriend($this->tripService->loggedInUser);
-        $friend->addTrip(new Trip());
-        $friend->addTrip(new Trip());
+        $anotherUser = new User(self::ANOTHER_USER);
+        $toBrazil = new Trip();
+        $toLondon = new Trip();
+
+        $friend = UserBuilder::aUser()
+                    ->friendsWith($anotherUser, $this->tripService->loggedInUser)
+                    ->withTrips($toBrazil, $toLondon)
+                    ->build();
 
         $friendTrip = $this->tripService->getTripsByUser($friend);
 
