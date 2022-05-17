@@ -37,8 +37,8 @@ class User
         $this->trips[] = $trip;
     }
 
-    public function isFriendsWith(User $paul): bool
+    public function isFriendsWith(User $anotherUser): bool
     {
-        return false;
+        return in_array($anotherUser, $this->friends, true);
     }
 }

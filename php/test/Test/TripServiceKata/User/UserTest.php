@@ -19,4 +19,16 @@ class UserTest extends TestCase
 
         self::assertFalse($user->isFriendsWith($paul));
     }
+
+    /** @test */
+    public function should_inform_when_users_are_friends() {
+        $bob = new User();
+        $paul = new User();
+
+        $user = UserBuilder::aUser()
+            ->friendsWith($bob, $paul)
+            ->build();
+
+        self::assertTrue($user->isFriendsWith($paul));
+    }
 }
