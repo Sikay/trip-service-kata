@@ -7,8 +7,8 @@ use TripServiceKata\User\User;
 
 class UserBuilder {
 
-    private array $friends;
-    private array $trips;
+    private array $friends = [];
+    private array $trips = [];
 
     public static function aUser(): UserBuilder
     {
