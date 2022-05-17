@@ -5,6 +5,7 @@ namespace Test\TripServiceKata\Trip;
 use PHPUnit\Framework\TestCase;
 use TripServiceKata\Exception\UserNotLoggedInException;
 use TripServiceKata\Trip\Trip;
+use TripServiceKata\Trip\TripDAO;
 use TripServiceKata\Trip\TripService;
 use TripServiceKata\User\User;
 
@@ -15,22 +16,24 @@ class TripServiceTest extends TestCase
     private const REGISTERED_USER = 'Francisco';
     private const ANOTHER_USER = 'Pepe';
 
-    private TesteableTripService $tripService;
+    private TripService $tripService;
     private User $loggedInUser;
+    private TripDAO $tripDAO;
 
     protected function setUp()
     {
-        $this->tripService = new TesteableTripService();
+        $this->tripService = new TripService();
         $this->loggedInUser = new User(self::REGISTERED_USER);
+        $this->tripDAO = $this->getMockBuilder(TripDAO::class)->getMock();
     }
 
     /** @test */
     public function should_throw_an_exception_when_user_is_not_logged_in() {
         $this->expectException(UserNotLoggedInException::class);
 
-        $this->tripService->loggedInUser = self::GUEST;
+        $this->loggedInUser = new User(self::GUEST);
 
-        $this->tripService->getTripsByUser(new User(self::UNUSED_USER), self::GUEST);
+        $this->tripService->getTripsByUser(new User(self::UNUSED_USER), $this->tripDAO, self::GUEST);
     }
 
     /** @test */
@@ -38,12 +41,16 @@ class TripServiceTest extends TestCase
         $anotherUser = new User(self::ANOTHER_USER);
         $toBrazil = new Trip();
 
+        $this->tripDAO
+            ->method('tripsBy')
+            ->willReturn([]);
+
         $friend = UserBuilder::aUser()
                     ->friendsWith($anotherUser)
                     ->withTrips($toBrazil)
                     ->build();
 
-        $friendTrip = $this->tripService->getTripsByUser($friend, $this->loggedInUser);
+        $friendTrip = $this->tripService->getTripsByUser($friend, $this->tripDAO, $this->loggedInUser);
 
         self::assertTrue(sizeof($friendTrip) === 0);
     }
@@ -54,24 +61,18 @@ class TripServiceTest extends TestCase
         $toBrazil = new Trip();
         $toLondon = new Trip();
 
+        $this->tripDAO
+            ->method('tripsBy')
+            ->willReturn([$toBrazil, $toLondon]);
+
         $friend = UserBuilder::aUser()
                     ->friendsWith($anotherUser, $this->loggedInUser)
                     ->withTrips($toBrazil, $toLondon)
                     ->build();
 
-        $friendTrip = $this->tripService->getTripsByUser($friend, $this->loggedInUser);
+        $friendTrip = $this->tripService->getTripsByUser($friend, $this->tripDAO, $this->loggedInUser);
 
         self::assertTrue(sizeof($friendTrip) === 2);
     }
 
-}
-
-class TesteableTripService extends TripService {
-
-    public $loggedInUser;
-
-    protected function tripsBy(User $user): array
-    {
-        return $user->getTrips();
-    }
 }
